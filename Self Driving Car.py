@@ -1,34 +1,4 @@
-### 4C16 Lab 6 - Self Driving Car
-In [ ]:
-### First!  Read https://github.com/frcs/EE4C16-self-driving-lab for more info.
 
-### Second!  Read this carefully!
-
-# In this lab you will train a neural net to drive a virtual driving simulator,
-# using data recorded from your own manual operation of the sim.
-#
-# Your model will attempt to predict the correct steering angle, given the input
-# images, using your recorded laps as training data.
-#
-# Your model will be operating in cruise control mode; it does not have any throttle
-# input, and will not be able to reverse.
-#
-# Step 1 is to run the simulator on your local machine (within Windows, in the CADLab)
-# and drive around while recording training data.  For each timestep in your driving,
-# three images are recorded: the center (straight ahead) view, and also left and right 
-# views.  Your steering angle is also recorded.
-#
-# Step 2: You will upload the training data to your cloud instance and train there, to 
-# take advantage of the GPU.
-#
-# Step 3: You will download the model and use it to pilot the car around the track ('autonomous mode')
-#
-# Step 4: You will upload the record of the car's positions back to your instance using Jupyter
-#
-# Step 5: You will 'git add' the record of the car's positions, and 'submit-lab 6' to check your score.
-#
-# You can repeat steps 2--5 with more training, more complex models, etc.
-# You can also repeat step 1 if you decide you need more or more varied training data.
 In [ ]:
 # Import some necessary modules.
 import keras
@@ -48,7 +18,7 @@ import ntpath
 import csv
 import PIL
 In [ ]:
-# Define some callbacks to plot progress of training.
+# callbacks to plot progress of training.
 class PlotLossAccuracy(keras.callbacks.Callback):
     def on_train_begin(self, logs={}):
         self.i = 0
@@ -121,14 +91,13 @@ def import_csv_data(logfile):
         
         parsed_data[center_image] = float(row[angle])
         
-        # This is a trick to maximize the data available.  Have a think about what is going on here...
+        # This is a trick to maximize the data available. 
         parsed_data[left_image] = float(row[angle]) + 0.20
         parsed_data[right_image] = float(row[angle]) - 0.20
 
     return parsed_data
 In [ ]:
-# You should have generated some training data on your local workstation at this point, and the instructions
-# on how to zip them (https://github.com/frcs/EE4C16-self-driving-lab)
+
 
 # Run this cell to extract the uploaded training data:
 !rm -rf IMG
@@ -144,7 +113,6 @@ def load_image(path_to_jpg):
     # We are going to discard the sky and the car, to focus training on the road.
     # This crop isolates that portion.  You can see the effects by changing the values
     # and re-evaluating that cell, but they must match the original values (top=50, bottom=140)
-    # when you train so as to match the input supplied from the simulator.
     left = 0
     right = im_width
     top = 50 # 0
@@ -187,16 +155,11 @@ def data_generator(training_data, batch_size, reject_above=True, reject_thresh=0
                 inputs_batch.clear()
                 targets_batch.clear()
 In [ ]:
-# Define your model in this cell.
-# See the paper 'End to End Learning for Self-Driving Cars' (Bojarski et al) for some ideas.
+
 
 inputs = Input(shape=(66, 200, 3))
 
 x = inputs
-
-## Add your layers here.  Go nuts!
-## (DO NOT ADD A LAMBDA LAYER to scale the input -- which you might see used in other online examples
-##   -- we do our scaling of input data in the data_generator, above).
 
 ## Your output is a single float: the desired steering angle.
 #x=keras.layers.BatchNormalization(axis=-1, momentum=0.99, epsilon=0.001, center=True, scale=True, beta_initializer='zeros', gamma_initializer='ones', moving_mean_initializer='zeros', moving_variance_initializer='ones', beta_regularizer=None, gamma_regularizer=None, beta_constraint=None, gamma_constraint=None)(x)
@@ -244,16 +207,3 @@ model.fit_generator(
 In [ ]:
 # Save the model to disk (when done training).
 save_model(model, './model.h5')
-In [ ]:
-# Now: 
-# * download your model using the Jupyter interface
-# * run the simulator in autonomous mode
-# * kick off your robot driver (python drive.py model.h5)
-# * wait for the car to crash, or head happily into the sunset, or whatever
-# * close or quit the simulator
-# * terminate your robot driver (ctrl-c in the console window)
-# * upload the file 'car_positions.npz' from your workstation to the lab-06 dir on your instance (using Jupyter)
-# * add this file to your repo: git add lab-06/car_positions.npz (in your remote terminal)
-# * commit this addition: git commit -m 'added car positions'
-# * 'git push'
-# * 'submit-lab 6'
